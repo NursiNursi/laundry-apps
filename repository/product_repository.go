@@ -25,7 +25,6 @@ func (p *productRepository) Create(payload model.Product) error {
 	return nil
 }
 
-// List implements
 func (p *productRepository) List() ([]model.Product, error) {
 	rows, err := p.db.Query("SELECT p.id, p.name, p.price, u.id, u.name FROM product p INNER JOIN uom u ON u.id = p.uom_id")
 	if err != nil {
@@ -42,26 +41,8 @@ func (p *productRepository) List() ([]model.Product, error) {
 		products = append(products, product)
 	}
 	return products, nil
-
-
-	// rows, err := p.db.Query("SELECT id, name, price, uom_id FROM product")
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// var products []model.Product
-	// for rows.Next() {
-	// 	var product model.Product
-	// 	err := rows.Scan(&product.Id, &product.Name, &product.Price, &product.Uom.Id)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// 	products = append(products, product)
-	// }
-	// return products, nil
 }
 
-// Get implements
 func (p *productRepository) Get(id string) (model.Product, error) {
 	var product model.Product
 	row := p.db.QueryRow("SELECT p.id, p.name, p.price, u.id, u.name FROM product p INNER JOIN uom u ON u.id = p.uom_id WHERE p.id = $1", id)
@@ -70,17 +51,8 @@ func (p *productRepository) Get(id string) (model.Product, error) {
 		return model.Product{}, err
 	}
 	return product, nil
-
-	// var product model.Product
-	// row := p.db.QueryRow("SELECT p.id, p.name, p.price, u.id, u.name FROM product p INNER JOIN uom u ON u.id = p.uom_id WHERE P.id = $1", id)
-	// err := row.Scan(&product.Id, &product.Name, &product.Price, &product.Uom.Id)
-	// if err != nil {
-	// 	return model.Product{}, err
-	// }
-	// return product, nil
 }
 
-// Update Implements
 func (p *productRepository) Update(payload model.Product) error {
 	_, err := p.db.Exec("UPDATE product SET name = $2, price = $3, uom_id = $4 WHERE id = $1", payload.Id, payload.Name, payload.Price, payload.Uom.Id)
 	if err != nil {
@@ -89,7 +61,6 @@ func (p *productRepository) Update(payload model.Product) error {
 	return nil
 }
 
-// Delete Implements
 func (p *productRepository) Delete(id string) error {
 	_, err := p.db.Exec("DELETE FROM product WHERE id = $1", id)
 	if err != nil {
@@ -117,7 +88,6 @@ func (p *productRepository) Paging(requestPaging dto.PaginationParam) ([]model.P
 		products = append(products, product)
 	}
 	
-	//count product
 	var totalRows int
 	row := p.db.QueryRow("SELECT COUNT(*) FROM product")
 	err = row.Scan(&totalRows)
@@ -131,14 +101,3 @@ func (p *productRepository) Paging(requestPaging dto.PaginationParam) ([]model.P
 func NewProductRepository(db *sql.DB) ProductRepository {
 	return &productRepository{db: db}
 }
-
-// var products []model.Product
-// for rows.Next() {
-// 	var product model.Product
-// 	err := rows.Scan(&product.Id, &product.Name, &product.Price, &product.Uom.Id)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	products = append(products, product)
-// }
-// return products, nil
