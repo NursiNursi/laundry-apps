@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/NursiNursi/laundry-apps/config"
-	"github.com/NursiNursi/laundry-apps/delivery/controller/api"
+	"github.com/NursiNursi/laundry-apps/delivery/controller"
 	"github.com/NursiNursi/laundry-apps/repository"
 	"github.com/NursiNursi/laundry-apps/usecase"
 	"github.com/NursiNursi/laundry-apps/utils/exceptions"
@@ -32,11 +32,11 @@ func (s *Server) Run() {
 
 func (s *Server) initController() {
 	// semua controller disini
-	api.NewUomController(s.uomUC, s.engine)
-	api.NewProductController(s.engine, s.productUC)
-	api.NewCustomerController(s.engine, s.customerUC)
-	api.NewEmployeeController(s.engine, s.employeeUC)
-	api.NewBillController(s.engine, s.billUC)
+	controller.NewUomController(s.uomUC, s.engine)
+	controller.NewProductController(s.engine, s.productUC)
+	controller.NewCustomerController(s.engine, s.customerUC)
+	controller.NewEmployeeController(s.engine, s.employeeUC)
+	controller.NewBillController(s.engine, s.billUC)
 }
 
 func NewServer() *Server {

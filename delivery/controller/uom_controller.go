@@ -1,4 +1,4 @@
-package api
+package controller
 
 import (
 	"github.com/NursiNursi/laundry-apps/model"

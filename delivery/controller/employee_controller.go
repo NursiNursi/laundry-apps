@@ -1,4 +1,4 @@
-package api
+package controller
 
 import (
 	"net/http"
@@ -11,34 +11,34 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type CustomerController struct {
+type EmployeeController struct {
 	router  *gin.Engine
-	usecase usecase.CustomerUseCase
+	usecase usecase.EmployeeUseCase
 }
 
-func (cc *CustomerController) createHandler(c *gin.Context) {
-	var customer model.Customer
-	if err := c.ShouldBindJSON(&customer); err != nil {
+func (e *EmployeeController) createHandler(c *gin.Context) {
+	var employee model.Employee
+	if err := c.ShouldBindJSON(&employee); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
 	}
 
-	customer.Id = common.GenerateID()
-	if err := cc.usecase.RegisterNewCustomer(customer); err != nil {
+	employee.Id = common.GenerateID()
+	if err := e.usecase.RegisterNewEmployee(employee); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, customer)
+	c.JSON(http.StatusCreated, employee)
 }
-func (cc *CustomerController) listHandler(c *gin.Context) {
+func (e *EmployeeController) listHandler(c *gin.Context) {
 	page, _ := strconv.Atoi(c.Query("page"))
 	limit, _ := strconv.Atoi(c.Query("limit"))
 	paginationParam := dto.PaginationParam{
 		Page:  page,
 		Limit: limit,
 	}
-	customers, paging, err := cc.usecase.FindAllCustomer(paginationParam)
+	employees, paging, err := e.usecase.FindAllEmployee(paginationParam)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
@@ -49,13 +49,13 @@ func (cc *CustomerController) listHandler(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"status": status,
-		"data":   customers,
+		"data":   employees,
 		"paging": paging,
 	})
 }
-func (cc *CustomerController) getHandler(c *gin.Context) {
+func (e *EmployeeController) getHandler(c *gin.Context) {
 	id := c.Param("id")
-	customer, err := cc.usecase.FindByIdCustomer(id)
+	employee, err := e.usecase.FindByIdEmployee(id)
 	if err != nil {
 		c.JSON(500, gin.H{"err": err.Error()})
 		return
@@ -66,42 +66,42 @@ func (cc *CustomerController) getHandler(c *gin.Context) {
 	}
 	c.JSON(200, gin.H{
 		"status": status,
-		"data":   customer,
+		"data":   employee,
 	})
 }
-func (cc *CustomerController) updateHandler(c *gin.Context) {
-	var customer model.Customer
-	if err := c.ShouldBindJSON(&customer); err != nil {
+func (e *EmployeeController) updateHandler(c *gin.Context) {
+	var employee model.Employee
+	if err := c.ShouldBindJSON(&employee); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"err": err.Error()})
 		return
 	}
 
-	if err := cc.usecase.UpdateCustomer(customer); err != nil {
+	if err := e.usecase.UpdateEmployee(employee); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"err": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, customer)
+	c.JSON(http.StatusOK, employee)
 }
-func (cc *CustomerController) deleteHandler(c *gin.Context) {
+func (e *EmployeeController) deleteHandler(c *gin.Context) {
 	id := c.Param("id")
-	if err := cc.usecase.DeleteCustomer(id); err != nil {
+	if err := e.usecase.DeleteEmployee(id); err != nil {
 		c.JSON(500, gin.H{"err": err.Error()})
 		return
 	}
 	c.String(204, "")
 }
 
-func NewCustomerController(r *gin.Engine, usecase usecase.CustomerUseCase) *CustomerController {
-	controller := CustomerController{
+func NewEmployeeController(r *gin.Engine, usecase usecase.EmployeeUseCase) *EmployeeController {
+	controller := EmployeeController{
 		router:  r,
 		usecase: usecase,
 	}
 	rg := r.Group("/api/v1")
-	rg.POST("/customers", controller.createHandler)
-	rg.GET("/customers", controller.listHandler)
-	rg.GET("/customers/:id", controller.getHandler)
-	rg.PUT("/customers", controller.updateHandler)
-	rg.DELETE("/customers/:id", controller.deleteHandler)
+	rg.POST("/employees", controller.createHandler)
+	rg.GET("/employees", controller.listHandler)
+	rg.GET("/employees/:id", controller.getHandler)
+	rg.PUT("/employees", controller.updateHandler)
+	rg.DELETE("/employees/:id", controller.deleteHandler)
 	return &controller
 }
