@@ -3,6 +3,8 @@ package config
 import (
 	"database/sql"
 	"fmt"
+
+	_ "github.com/lib/pq"
 )
 
 type DbConnection interface {
@@ -10,14 +12,13 @@ type DbConnection interface {
 }
 
 type dbConnection struct {
-	db *sql.DB
+	db  *sql.DB
 	cfg *Config
 }
 
 func (d *dbConnection) initDb() error {
 	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", d.cfg.Host, d.cfg.Port, d.cfg.User, d.cfg.Password, d.cfg.Name)
 	db, err := sql.Open(d.cfg.Driver, dsn)
-	// defer db.Close()
 	if err != nil {
 		return err
 	}
