@@ -5,15 +5,18 @@ import (
 
 	"github.com/NursiNursi/laundry-apps/config"
 	"github.com/NursiNursi/laundry-apps/delivery/controller"
+	"github.com/NursiNursi/laundry-apps/delivery/middleware"
 	"github.com/NursiNursi/laundry-apps/manager"
 	"github.com/NursiNursi/laundry-apps/utils/exceptions"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type Server struct {
 	useCaseManager manager.UseCaseManager
 	engine     *gin.Engine
 	host       string
+	log        *logrus.Logger
 }
 
 func (s *Server) Run() {
@@ -25,12 +28,15 @@ func (s *Server) Run() {
 }
 
 func (s *Server) setupControllers() {
+	s.engine.Use(middleware.LogRequestMiddleware(s.log))
 	// semua controller disini
 	controller.NewUomController(s.useCaseManager.UomUseCase(), s.engine)
 	controller.NewProductController(s.engine, s.useCaseManager.ProductUseCase())
 	controller.NewCustomerController(s.engine, s.useCaseManager.CustomerUseCase())
 	controller.NewEmployeeController(s.engine, s.useCaseManager.EmployeeUseCase())
 	controller.NewBillController(s.engine, s.useCaseManager.BillUseCase())
+	controller.NewUserController(s.engine, s.useCaseManager.UserUseCase())
+	controller.NewAuthController(s.engine, s.useCaseManager.AuthUseCase())
 }
 
 func NewServer() *Server {
@@ -45,5 +51,6 @@ func NewServer() *Server {
 		useCaseManager: useCaseManager,
 		engine:     engine,
 		host:       host,
+		log:        logrus.New(),
 	}
 }

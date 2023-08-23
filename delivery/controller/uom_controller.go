@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/NursiNursi/laundry-apps/delivery/middleware"
 	"github.com/NursiNursi/laundry-apps/model"
 	"github.com/NursiNursi/laundry-apps/usecase"
 	"github.com/gin-gonic/gin"
@@ -95,10 +96,10 @@ func NewUomController(usecase usecase.UomUseCase, r *gin.Engine) *UomController 
 	// /uom -> GET, POST, PUT, DELETE
 	// /api/v1/uoms
 	rg := r.Group("/api/v1")
-	rg.POST("/uoms", controller.createHandler)
-	rg.GET("/uoms", controller.listHandler)
-	rg.GET("/uoms/:id", controller.getHandler)
-	rg.PUT("/uoms", controller.updateHandler)
-	rg.DELETE("/uoms/:id", controller.deleteHandler)
+	rg.POST("/uoms", middleware.AuthMiddleware(), controller.createHandler)
+	rg.GET("/uoms", middleware.AuthMiddleware(), controller.listHandler)
+	rg.GET("/uoms/:id", middleware.AuthMiddleware(), controller.getHandler)
+	rg.PUT("/uoms", middleware.AuthMiddleware(), controller.updateHandler)
+	rg.DELETE("/uoms/:id", middleware.AuthMiddleware(), controller.deleteHandler)
 	return &controller
 }
