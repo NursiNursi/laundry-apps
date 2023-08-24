@@ -5,12 +5,14 @@ import (
 
 	"github.com/NursiNursi/laundry-apps/model"
 	"github.com/NursiNursi/laundry-apps/model/dto"
+	"github.com/NursiNursi/laundry-apps/utils/common"
 )
 
 type BillRepository interface {
 	Create(payload model.Bill) error
 	Get(id string) (dto.BillResponseDto, error)
-	List(requestPaging dto.PaginationParam) ([]dto.BillResponseDto, dto.Paging, error)
+	BaseRepositoryPaging[dto.BillResponseDto]
+	// Paging(requestPaging dto.PaginationParam) ([]dto.BillResponseDto, dto.Paging, error)
 }
 
 type billRepository struct {
@@ -82,8 +84,33 @@ func (b *billRepository) Get(id string) (dto.BillResponseDto, error) {
 }
 
 // Paging implements BillRepository.
-func (b *billRepository) List(requestPaging dto.PaginationParam) ([]dto.BillResponseDto, dto.Paging, error) {
-	return nil, dto.Paging{}, nil
+func (b *billRepository) Paging(requestPaging dto.PaginationParam) ([]dto.BillResponseDto, dto.Paging, error) {
+	var paginationQuery dto.PaginationQuery
+	paginationQuery = common.GetPaginationParams(requestPaging)
+
+	rows, err := b.db.Query(`SELECT b.id as bill_id, b.bill_date, b.entry_date, b.finish_date, c.id as customer_id, c.name as customer_name, c.phone_number as customer_phone, c.address as customer_address, e.id as employee_id, e.name as employee_name, e.phone_number as employee_phone, e.address as employee_address
+	FROM bill b JOIN customer c ON c.id = b.customer_id	JOIN employee e ON e.id = b.employee_id LIMIT $1 OFFSET $2`, paginationQuery.Take, paginationQuery.Skip)
+	if err != nil {
+		return nil, dto.Paging{}, err
+	}
+	var bills []dto.BillResponseDto
+	for rows.Next() {
+		var bill dto.BillResponseDto
+		err := rows.Scan(&bill.Id, &bill.BillDate, &bill.EntryDate, &bill.FinishDate, &bill.Customer.Id, &bill.Customer.Name, &bill.Customer.PhoneNumber, &bill.Customer.Address, &bill.Employee.Id, &bill.Employee.Name, &bill.Employee.PhoneNumber, &bill.Employee.Address)
+		if err != nil {
+			return nil, dto.Paging{}, err
+		}
+		bills = append(bills, bill)
+	}
+
+	var totalRows int
+	row := b.db.QueryRow("SELECT COUNT(*) FROM bill")
+	err = row.Scan(&totalRows)
+	if err != nil {
+		return nil, dto.Paging{}, err
+	}
+
+	return bills, common.Paginate(paginationQuery.Page, paginationQuery.Take, totalRows), nil
 }
 
 func NewBillRepository(db *sql.DB) BillRepository {

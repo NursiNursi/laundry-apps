@@ -62,7 +62,7 @@ func (b *billUseCase) RegisterNewBill(newBill model.Bill) error {
 }
 
 func (b *billUseCase) FindAllBill(requestPaging dto.PaginationParam) ([]dto.BillResponseDto, dto.Paging, error) {
-	return b.repo.List(requestPaging)
+	return b.repo.Paging(requestPaging)
 }
 
 func (b *billUseCase) FindByIdBill(id string) (dto.BillResponseDto, error) {
